@@ -96,10 +96,10 @@ def proceso(env, nram, ram, cpu, inst):
                     yield proc
                     yield env.timeout(1)  
         # print('***Outside while, process Terminated:\n'.upper())
-    ram.put(nram)
+    # ram.put(nram)
     # print('ya devolvio ram')
     # print_stats(ram)
-    print('final time:', (env.now))
+    # print('final time:', (env.now))
     Data.res.append(env.now - start)
     env.exit()  #   finalizado proceso, terminado.
     
