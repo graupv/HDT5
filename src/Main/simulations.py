@@ -125,9 +125,9 @@ def run():
     Data.res = []
     env = simpy.Environment()
     #   ambiente de simulacion
-    RAM = simpy.Container(env, capacity=100, init=100)
+    RAM = simpy.Container(env, capacity=200, init=200)
     #   100 Unidades de RAM, 
-    # en algunos casos se cambia capacity e init a 200
+    # en algunos casos se cambia capacity de init a 200
     CPU = simpy.Resource(env, capacity=1)
     #   Para algunas simulaciones hay que cambiar capacity de CPU a 2
     print('Ingresar numero de procesos: ')
