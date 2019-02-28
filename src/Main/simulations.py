@@ -143,7 +143,6 @@ def run():
     print("\nResumen:\n")
     print(d)
 
-#   25, 50, 100, 200, 250
-#   100 procesos necesita 800 simulation time
+#   25, 50, 100, 150, 200
 if __name__ == '__main__':
     run()
