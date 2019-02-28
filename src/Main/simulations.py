@@ -1,11 +1,10 @@
 '''
 Hoja de Trabajo 5   -   Simulaciones discretas en Simpy
 
-Kristen Brandt - 1
+Kristen Brandt - 171482
 Gerardo Pineda - 18848
 
 '''
-
 import simpy
 import random
 from math import sqrt
