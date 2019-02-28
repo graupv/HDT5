@@ -1,2 +1,4 @@
 
 *.pyc
+src/Main/__pycache__/simulations.cpython-36.pyc
+*.pyc

@@ -34,9 +34,16 @@ class Data:
         return str(sqrt(total / len(self.res)))
 
 def print_stats(res):
-    print(f'{res.count} of {res.capacity} slots are allocated.')
-    print(f'\tUsers: {res.users}')
-    print(f'\tQueued events: {res.queue}')
+    if type(res) == simpy.Resource:
+        print(f'{res.count} of {res.capacity} cpu.')
+        print(f'\tUsing: {res.users}')
+        print(f'\tIn queue: {res.queue}')
+    else:
+        print(f'{res.level} of {res.capacity} available.')
+        # print(f'\tGet queue: {res.GetQueue()}')
+        print(f'\tGet queue: {res.get_queue}')
+        # print(f'\tPut queue: {res.PutQueue()}')
+        print(f'\tPut queue: {res.put_queue}')
 
 def proceso(env, nram, ram, cpu, inst):
     print(f'Instructions: {inst}')
@@ -49,45 +56,51 @@ def proceso(env, nram, ram, cpu, inst):
         # yield env.timeout(1)
         #   esperar un ciclo de reloj mientras se libera memoria
         #   yield para devolver control al ciclo
-
-    yield ram.get(nram)
+    # print('***Before RAM request:\n'.upper())
+    # print_stats(ram)
+    with ram.get(nram) as memory:
+        yield memory
+        # print('***After RAM request:\n'.upper())
+        # print_stats(ram)
     #   allocate ram
     #   new -> Ready
-    # print('***Before cpu request:\n'.upper())
-    # print_stats(cpu)
+        # print('***Before cpu request:\n'.upper())
+        # print_stats(cpu)
 
-    if inst > 2:
-        while inst > 2:
+        if inst > 2:
+            while inst > 2:
+                with cpu.request() as proc:
+                    # print('***Requested CPU:\n'.upper())
+                    # print_stats(cpu)
+                    yield proc
+                    yield env.timeout(1)    
+                    inst -= 3
+                    #   simula procesamiento de 3 instrucciones
+                    # print('***Post Yield, inst -3:'.upper())
+                    # print('***inst left:', inst, '\n')
+                    #   fin with devuelve el CPU 
+                    
+                # print('***Outside WITH, releasing cpu:\n'.upper())
+                # print_stats(cpu)
+                #   random int para ver si va a cola de waiting o regresa a ready
+                if random.randint(1, 2) == 2:
+                    yield env.timeout(1)
+                    #   simular operaciones I/O, regresa a cola para pedir cpu luego de 1 ciclo
+        else:
+            #   2 o menos instrucciones,
+            #   si el proceso tiene 2 o menos instrucciones simula un solo ciclo
+            #   ya que si tiene mas al llegar a 2 se libera anticipadamente.
             with cpu.request() as proc:
-                # print('***Requested CPU:\n'.upper())
-                # print_stats(cpu)
-                yield proc
-                yield env.timeout(1)    
-                inst -= 3
-                #   simula procesamiento de 3 instrucciones
-                # print('***Post Yield, inst -3:'.upper())
-                # print('***inst left:', inst, '\n')
-                #   fin with devuelve el CPU 
-                
-            # print('***Outside WITH, releasing cpu:\n'.upper())
-            # print_stats(cpu)
-            #   random int para ver si va a cola de waiting o regresa a ready
-            if random.randint(1, 2) == 2:
-                yield env.timeout(1)
-                #   simular operaciones I/O, regresa a cola para pedir cpu luego de 1 ciclo
-    else:
-        #   2 o menos instrucciones,
-        #   si el proceso tiene 2 o menos instrucciones simula un solo ciclo
-        #   ya que si tiene mas al llegar a 2 se libera anticipadamente.
-        with cpu.request() as proc:
-                # print('***Requested CPU:\n'.upper())
-                # print_stats(cpu)
-                yield proc
-                yield env.timeout(1)  
-    # print('***Outside while, process Terminated:\n'.upper())
+                    # print('***Requested CPU:\n'.upper())
+                    # print_stats(cpu)
+                    yield proc
+                    yield env.timeout(1)  
+        # print('***Outside while, process Terminated:\n'.upper())
+    ram.put(nram)
+    # print('ya devolvio ram')
+    # print_stats(ram)
     print('final time:', (env.now))
     Data.res.append(env.now - start)
-    yield ram.put(nram) #   devolver memoria utilizada
     env.exit()  #   finalizado proceso, terminado.
     
 def get_int():
@@ -129,7 +142,6 @@ def run():
     print("\nResumen:\n")
     print(d)
 
-#   25, 50, 100, 200, 250
-#   100 procesos necesita 800 simulation time
+#   25, 50, 100, 150, 200
 if __name__ == '__main__':
     run()
